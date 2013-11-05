@@ -329,6 +329,18 @@ texture_region(struct weston_view *ev, pixman_region32_t *region,
 				/* position: */
 				*(v++) = ex[k];
 				*(v++) = ey[k];
+				if (ev->surface->viewport.active) {
+					int32_t src_x, src_y, src_w, src_h, dst_w, dst_h;
+					struct surface_viewport *vp = &ev->surface->viewport;
+					src_x = vp->sx;
+					src_y = vp->sy;
+					src_w = vp->sw;
+					src_h = vp->sh;
+					dst_w = vp->width;
+					dst_h = vp->height;
+					sx = (sx * src_w) / dst_w + src_x;
+					sy = (sy * src_h) / dst_h + src_y;
+				}
 				/* texcoord: */
 				weston_surface_to_buffer_float(ev->surface,
 							       sx, sy,

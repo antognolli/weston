@@ -630,6 +630,12 @@ struct weston_region {
 	pixman_region32_t region;
 };
 
+struct surface_viewport {
+	int sx, sy, sw, sh;
+	int width, height;
+	int active;
+};
+
 struct weston_subsurface {
 	struct wl_resource *resource;
 
@@ -675,6 +681,8 @@ struct weston_subsurface {
 
 		/* wl_surface.set_buffer_scale */
 		int32_t buffer_scale;
+
+		struct surface_viewport viewport;
 	} cached;
 
 	int synchronized;
@@ -817,6 +825,8 @@ struct weston_surface {
 	int32_t buffer_scale;
 	int keep_buffer; /* bool for backends to prevent early release */
 
+	struct surface_viewport viewport;
+
 	/* All the pending state, that wl_surface.commit will apply. */
 	struct {
 		/* wl_surface.attach */
@@ -843,6 +853,8 @@ struct weston_surface {
 
 		/* wl_surface.set_scaling_factor */
 		int32_t buffer_scale;
+
+		struct surface_viewport viewport;
 	} pending;
 
 	/*

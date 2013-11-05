@@ -240,5 +240,24 @@
       </description>
     </request>
 
+    <request name="set_viewport">
+      <description summary="set viewport of the subsurface">
+	This schedules a sub-surface viewport change.
+
+	The sub-surface viewport is a small portion of the original subsurface,
+	cropped by sx, sy, sw and sh, and displayed (scaled if necessary) with
+	the width and height set by this request.
+
+	The next wl_surface.commit on the surface will apply this change.
+      </description>
+
+      <arg name="sx" type="int" summary="source Y position of the subsurface viewport"/>
+      <arg name="sy" type="int" summary="source X position of the subsurface viewport"/>
+      <arg name="sw" type="int" summary="source width of the subsurface viewport"/>
+      <arg name="sh" type="int" summary="source height of the subsurface viewport"/>
+      <arg name="width" type="int" summary="destination width of the subsurface viewport"/>
+      <arg name="height" type="int" summary="destination height of the subsurface viewport"/>
+    </request>
+
   </interface>
 </protocol>

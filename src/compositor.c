@@ -1608,8 +1608,8 @@ view_list_add_subsurface_view(struct weston_compositor *compositor,
 		weston_view_configure(view,
 				      sub->position.x,
 				      sub->position.y,
-				      sub->surface->width,
-				      sub->surface->height);
+				      sub->surface->viewport.width,
+				      sub->surface->viewport.height);
 		weston_view_set_transform_parent(view, parent);
 	}
 
@@ -2192,6 +2192,15 @@ weston_subsurface_commit_from_cache(struct weston_subsurface *sub)
 		weston_surface_attach(surface, sub->cached.buffer_ref.buffer);
 	weston_buffer_reference(&sub->cached.buffer_ref, NULL);
 
+	/* wl_subsurface.set_viewport */
+	surface->viewport.sx = sub->cached.viewport.sx;
+	surface->viewport.sy = sub->cached.viewport.sy;
+	surface->viewport.sw = sub->cached.viewport.sw;
+	surface->viewport.sh = sub->cached.viewport.sh;
+	surface->viewport.width = sub->cached.viewport.width;
+	surface->viewport.height = sub->cached.viewport.height;
+	surface->viewport.active = sub->cached.viewport.active;
+
 	surface->width = 0;
 	surface->height = 0;
 	if (surface->buffer_ref.buffer) {
@@ -2277,6 +2286,14 @@ weston_subsurface_commit_to_cache(struct weston_subsurface *sub)
 	surface->pending.sx = 0;
 	surface->pending.sy = 0;
 	surface->pending.newly_attached = 0;
+
+	sub->cached.viewport.sx = surface->pending.viewport.sx;
+	sub->cached.viewport.sy = surface->pending.viewport.sy;
+	sub->cached.viewport.sw = surface->pending.viewport.sw;
+	sub->cached.viewport.sh = surface->pending.viewport.sh;
+	sub->cached.viewport.width = surface->pending.viewport.width;
+	sub->cached.viewport.height = surface->pending.viewport.height;
+	sub->cached.viewport.active = surface->pending.viewport.active;
 
 	sub->cached.buffer_transform = surface->pending.buffer_transform;
 	sub->cached.buffer_scale = surface->pending.buffer_scale;
@@ -2383,7 +2400,8 @@ subsurface_configure(struct weston_surface *surface, int32_t dx, int32_t dy,
 		weston_view_configure(view,
 				      view->geometry.x + dx,
 				      view->geometry.y + dy,
-				      width, height);
+				      surface->viewport.width,
+				      surface->viewport.height);
 
 	/* No need to check parent mappedness, because if parent is not
 	 * mapped, parent is not in a visible layer, so this sub-surface
@@ -2553,6 +2571,27 @@ subsurface_set_desync(struct wl_client *client, struct wl_resource *resource)
 }
 
 static void
+subsurface_set_viewport(struct wl_client *client,
+			struct wl_resource *resource,
+			int32_t sx, int32_t sy, int32_t sw, int32_t sh,
+			int32_t width, int32_t height)
+{
+	struct weston_subsurface *sub = wl_resource_get_user_data(resource);
+	struct weston_surface *surface = sub->surface;
+
+	if (!sub)
+		return;
+
+	surface->pending.viewport.sx = sx;
+	surface->pending.viewport.sy = sy;
+	surface->pending.viewport.sw = sw;
+	surface->pending.viewport.sh = sh;
+	surface->pending.viewport.width = width;
+	surface->pending.viewport.height = height;
+	surface->pending.viewport.active = 1;
+}
+
+static void
 weston_subsurface_cache_init(struct weston_subsurface *sub)
 {
 	pixman_region32_init(&sub->cached.damage);
@@ -2697,7 +2736,8 @@ static const struct wl_subsurface_interface subsurface_implementation = {
 	subsurface_place_above,
 	subsurface_place_below,
 	subsurface_set_sync,
-	subsurface_set_desync
+	subsurface_set_desync,
+	subsurface_set_viewport
 };
 
 static struct weston_subsurface *
