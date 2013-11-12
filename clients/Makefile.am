@@ -94,7 +94,9 @@ libtoytoolkit_la_SOURCES =			\
 	text-cursor-position-protocol.c		\
 	text-cursor-position-client-protocol.h	\
 	workspaces-protocol.c			\
-	workspaces-client-protocol.h
+	workspaces-client-protocol.h		\
+	xdg-shell-protocol.c			\
+	xdg-shell-client-protocol.h
 
 libtoytoolkit_la_LIBADD =			\
 	$(CLIENT_LIBS)				\
@@ -217,7 +219,9 @@ BUILT_SOURCES =					\
 	desktop-shell-client-protocol.h		\
 	desktop-shell-protocol.c		\
 	workspaces-client-protocol.h		\
-	workspaces-protocol.c
+	workspaces-protocol.c			\
+	xdg-shell-protocol.c			\
+	xdg-shell-client-protocol.h
 
 CLEANFILES = $(BUILT_SOURCES)
 endif
