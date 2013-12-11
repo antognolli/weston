@@ -248,6 +248,8 @@ struct window {
 
 	struct window_frame *frame;
 
+	struct window *parent;
+
 	/* struct surface::link, contains also main_surface */
 	struct wl_list subsurface_list;
 
@@ -3840,12 +3842,19 @@ static void
 window_flush(struct window *window)
 {
 	struct surface *surface;
+	struct wl_surface *parent_surface = NULL;
 
 	if (!window->custom) {
 		if (!window->xdg_popup && !window->xdg_surface) {
 			window->xdg_surface = xdg_shell_get_xdg_surface(window->display->xdg_shell,
 									window->main_surface->surface);
 			fail_on_null(window->xdg_surface);
+
+			if (window->parent && window->parent->main_surface)
+				parent_surface =
+					window->parent->main_surface->surface;
+			xdg_surface_set_transient_for(window->xdg_surface,
+						      parent_surface);
 
 			xdg_surface_set_user_data(window->xdg_surface, window);
 			xdg_surface_add_listener(window->xdg_surface,
@@ -4030,10 +4039,10 @@ window_is_fullscreen(struct window *window)
 	return window->fullscreen;
 }
 
-int
-window_is_transient(struct window *window)
+struct window *
+window_get_transient(struct window *window)
 {
-	return window->type == TYPE_TRANSIENT;
+	return window->parent;
 }
 
 static void
@@ -4331,6 +4340,24 @@ struct window *
 window_create_custom(struct display *display)
 {
 	return window_create_internal(display, 1);
+}
+
+void
+window_set_transient_for(struct window *window, struct window *parent)
+{
+	struct wl_surface *parent_surface = NULL;
+
+	window->parent = parent;
+
+	if (!window->xdg_surface)
+		return;
+
+	if (parent && parent->main_surface && parent->main_surface->surface)
+		parent_surface = parent->main_surface->surface;
+
+	if (window->xdg_surface)
+		xdg_surface_set_transient_for(window->xdg_surface,
+					      parent_surface);
 }
 
 static void

@@ -272,6 +272,8 @@ window_create_transient(struct display *display, struct window *parent,
 			int32_t x, int32_t y, uint32_t flags);
 struct window *
 window_create_custom(struct display *display);
+void
+window_set_transient_for(struct window *window, struct window *parent);
 
 int
 window_has_focus(struct window *window);
@@ -360,8 +362,8 @@ display_surface_damage(struct display *display, cairo_surface_t *cairo_surface,
 void
 window_set_buffer_type(struct window *window, enum window_buffer_type type);
 
-int
-window_is_transient(struct window *window);
+struct window *
+window_get_transient(struct window *window);
 
 int
 window_is_fullscreen(struct window *window);
