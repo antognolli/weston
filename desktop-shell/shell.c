@@ -2373,8 +2373,8 @@ set_full_output(struct shell_surface *shsurf)
 {
 	shsurf->saved_x = shsurf->view->geometry.x;
 	shsurf->saved_y = shsurf->view->geometry.y;
-	shsurf->saved_width = shsurf->surface->width;
-	shsurf->saved_height = shsurf->surface->height;
+	shsurf->saved_width = shsurf->last_width;
+	shsurf->saved_height = shsurf->last_height;
 	shsurf->saved_size_valid = true;
 	shsurf->saved_position_valid = true;
 
